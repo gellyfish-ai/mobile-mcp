@@ -285,10 +285,27 @@ export class WebDriverAgent {
 
 	public async openUrl(url: string): Promise<void> {
 		await this.withinSession(async sessionUrl => {
-			await fetch(`${sessionUrl}/url`, {
-				method: "POST",
-				body: JSON.stringify({ url }),
-			});
+			// Custom URL schemes (e.g. whatsapp://) may trigger iOS confirmation
+			// dialogs that block WDA indefinitely. Use a timeout so the agent
+			// can take a screenshot and handle the dialog.
+			const controller = new AbortController();
+			const timeout = setTimeout(() => controller.abort(), 10000);
+			try {
+				await fetch(`${sessionUrl}/url`, {
+					method: "POST",
+					body: JSON.stringify({ url }),
+					signal: controller.signal,
+				});
+			} catch (err: unknown) {
+				if (err instanceof Error && err.name === "AbortError") {
+					// Timed out — URL was likely opened but a dialog is blocking WDA.
+					// Return normally so the agent can handle it.
+					return;
+				}
+				throw err;
+			} finally {
+				clearTimeout(timeout);
+			}
 		});
 	}
 

@@ -520,7 +520,11 @@ export const createMcpServer = (): McpServer => {
 		{ destructiveHint: true },
 		async ({ device, url }) => {
 			const robot = getRobotFromDevice(device);
+			const isCustomScheme = url.includes("://") && !url.startsWith("http://") && !url.startsWith("https://");
 			await robot.openUrl(url);
+			if (isCustomScheme) {
+				return `Opened URL: ${url}\nNote: Custom URL schemes may trigger a confirmation dialog on iOS. Take a screenshot to check if a dialog appeared and tap it if needed.`;
+			}
 			return `Opened URL: ${url}`;
 		}
 	);
