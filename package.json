@@ -1,11 +1,11 @@
 {
-  "name": "@mobilenext/mobile-mcp",
-  "mcpName": "io.github.mobile-next/mobile-mcp",
-  "version": "0.0.1",
-  "description": "Mobile MCP",
+  "name": "@gellyfish/mobile-mcp",
+  "mcpName": "io.github.gellyfish-ai/mobile-mcp",
+  "version": "0.1.0",
+  "description": "Mobile MCP — Gellyfish fork with timeout fixes, wake device, WDA launch/terminate",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mobile-next/mobile-mcp.git"
+    "url": "git+https://github.com/gellyfish-ai/mobile-mcp.git"
   },
   "engines": {
     "node": ">=18"
@@ -66,7 +66,7 @@
   },
   "author": "",
   "bugs": {
-    "url": "https://github.com/mobile-next/mobile-mcp/issues"
+    "url": "https://github.com/gellyfish-ai/mobile-mcp/issues"
   },
-  "homepage": "https://github.com/mobile-next/mobile-mcp#readme"
+  "homepage": "https://github.com/gellyfish-ai/mobile-mcp#readme"
 }
