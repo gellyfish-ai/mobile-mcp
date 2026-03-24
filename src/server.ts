@@ -536,7 +536,7 @@ export const createMcpServer = (): McpServer => {
 		{
 			device: z.string().describe("The device identifier to use. Use mobile_list_available_devices to find which devices are available to you."),
 		},
-		{},
+		{ readOnlyHint: true },
 		async ({ device }) => {
 			const robot = getRobotFromDevice(device);
 			await robot.wakeDevice();
