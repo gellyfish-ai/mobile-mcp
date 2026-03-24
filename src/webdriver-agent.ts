@@ -468,4 +468,15 @@ export class WebDriverAgent {
 			return json.value.toLowerCase() as Orientation;
 		});
 	}
+
+	public async wakeDevice(): Promise<void> {
+		// Press home button via WDA to wake the screen from display sleep
+		await this.withinSession(async sessionUrl => {
+			await fetch(`${sessionUrl}/wda/pressButton`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ name: "home" }),
+			});
+		});
+	}
 }

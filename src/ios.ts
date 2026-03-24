@@ -240,6 +240,11 @@ export class IosRobot implements Robot {
 		const wda = await this.wda();
 		return await wda.getOrientation();
 	}
+
+	public async wakeDevice(): Promise<void> {
+		const wda = await this.wda();
+		await wda.wakeDevice();
+	}
 }
 
 export class IosManager {

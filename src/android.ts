@@ -476,6 +476,11 @@ export class AndroidRobot implements Robot {
 		return rotation === "0" ? "portrait" : "landscape";
 	}
 
+	public async wakeDevice(): Promise<void> {
+		// Use KEYCODE_WAKEUP to turn the screen on
+		this.adb("shell", "input", "keyevent", "KEYCODE_WAKEUP");
+	}
+
 	private async getUiAutomatorDump(): Promise<string> {
 		for (let tries = 0; tries < 10; tries++) {
 			const dump = this.adb("exec-out", "uiautomator", "dump", "/dev/tty").toString();

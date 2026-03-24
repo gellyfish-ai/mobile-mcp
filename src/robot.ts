@@ -144,4 +144,10 @@ export interface Robot {
 	 * Get the current screen orientation.
 	 */
 	getOrientation(): Promise<Orientation>;
+
+	/**
+	 * Wake the device from display sleep. Ensures the screen is on
+	 * and ready for interaction.
+	 */
+	wakeDevice(): Promise<void>;
 }

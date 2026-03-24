@@ -218,4 +218,9 @@ export class MobileDevice implements Robot {
 		const response = JSON.parse(this.runCommand(["device", "orientation", "get"])) as OrientationResponse;
 		return response.data.orientation;
 	}
+
+	public async wakeDevice(): Promise<void> {
+		// Press home button to wake the screen
+		this.runCommand(["io", "button", "HOME"]);
+	}
 }
