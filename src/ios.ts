@@ -242,8 +242,14 @@ export class IosRobot implements Robot {
 	}
 
 	public async wakeDevice(): Promise<void> {
-		const wda = await this.wda();
-		await wda.wakeDevice();
+		// Use go-ios activate (works from deep sleep, unlike WDA home button)
+		try {
+			await this.ios("activate");
+		} catch {
+			// Fallback to WDA home button press if go-ios activate fails
+			const wda = await this.wda();
+			await wda.wakeDevice();
+		}
 	}
 }
 
