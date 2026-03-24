@@ -470,13 +470,26 @@ export class WebDriverAgent {
 	}
 
 	public async wakeDevice(): Promise<void> {
-		// Press home button via WDA to wake the screen from display sleep
 		await this.withinSession(async sessionUrl => {
+			// 1. Try WDA unlock endpoint (wakes screen from sleep)
+			await fetch(`${sessionUrl}/wda/unlock`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+			});
+			// 2. Also press home button as additional signal
 			await fetch(`${sessionUrl}/wda/pressButton`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ name: "home" }),
 			});
+		});
+	}
+
+	public async isLocked(): Promise<boolean> {
+		return this.withinSession(async sessionUrl => {
+			const response = await fetch(`${sessionUrl}/wda/locked`);
+			const json = await response.json();
+			return json.value === true;
 		});
 	}
 }
