@@ -242,14 +242,22 @@ export class IosRobot implements Robot {
 	}
 
 	public async wakeDevice(): Promise<void> {
-		// Use go-ios activate (works from deep sleep, unlike WDA home button)
+		// Strategy: launch SpringBoard (home screen) via go-ios to force screen on,
+		// then press home button via WDA as backup.
+		// ios activate is NOT screen wake — it's iCloud activation lock.
 		try {
-			await this.ios("activate");
+			await this.ios("launch", "com.apple.springboard");
 		} catch {
-			// Fallback to WDA home button press if go-ios activate fails
+			// SpringBoard launch may fail — try launching Preferences instead
+			try {
+				await this.ios("launch", "com.apple.Preferences");
+			} catch { /* ignore */ }
+		}
+		// Also press home button via WDA as additional signal
+		try {
 			const wda = await this.wda();
 			await wda.wakeDevice();
-		}
+		} catch { /* ignore */ }
 	}
 }
 
