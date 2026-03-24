@@ -482,6 +482,20 @@ export class WebDriverAgent {
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({ name: "home" }),
 			});
+
+			// 3. Check if still locked — /wda/unlock doesn't work on passcode-free devices
+			await new Promise(resolve => setTimeout(resolve, 1000));
+			const lockResponse = await fetch(`${sessionUrl}/wda/locked`);
+			const lockJson = await lockResponse.json();
+			if (lockJson.value === true) {
+				// Force unlock by launching an app via WDA — this bypasses the lock
+				// screen on devices without a passcode
+				await fetch(`${sessionUrl}/wda/apps/launch`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ bundleId: "com.apple.springboard" }),
+				});
+			}
 		});
 	}
 
@@ -490,6 +504,34 @@ export class WebDriverAgent {
 			const response = await fetch(`${sessionUrl}/wda/locked`);
 			const json = await response.json();
 			return json.value === true;
+		});
+	}
+
+	public async launchApp(bundleId: string): Promise<void> {
+		await this.withinSession(async sessionUrl => {
+			const response = await fetch(`${sessionUrl}/wda/apps/launch`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ bundleId }),
+			});
+			const json = await response.json();
+			if (json.value && json.value.error) {
+				throw new ActionableError(`Failed to launch app ${bundleId}: ${json.value.message}`);
+			}
+		});
+	}
+
+	public async terminateApp(bundleId: string): Promise<void> {
+		await this.withinSession(async sessionUrl => {
+			const response = await fetch(`${sessionUrl}/wda/apps/terminate`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ bundleId }),
+			});
+			const json = await response.json();
+			if (json.value && json.value.error) {
+				throw new ActionableError(`Failed to terminate app ${bundleId}: ${json.value.message}`);
+			}
 		});
 	}
 }

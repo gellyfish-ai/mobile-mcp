@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 
 import { WebDriverAgent } from "./webdriver-agent";
 import { ActionableError, Button, InstalledApp, Robot, ScreenSize, SwipeDirection, ScreenElement, Orientation } from "./robot";
-import { validatePackageName, validateLocale } from "./utils";
+import { validatePackageName } from "./utils";
 
 const WDA_PORT = 8100;
 const IOS_TUNNEL_PORT = 60105;
@@ -140,22 +140,18 @@ export class IosRobot implements Robot {
 
 	public async launchApp(packageName: string, locale?: string): Promise<void> {
 		validatePackageName(packageName);
-		await this.assertTunnelRunning();
-		const args = ["launch", packageName];
-		if (locale) {
-			validateLocale(locale);
-			const locales = locale.split(",").map(l => l.trim());
-			args.push("-AppleLanguages", `(${locales.join(", ")})`);
-			args.push("-AppleLocale", locales[0]);
-		}
-
-		await this.ios(...args);
+		// Use WDA to launch apps — go-ios `launch` uses the instruments service
+		// which conflicts with WDA (both can't use instruments simultaneously)
+		const wda = await this.wda();
+		await wda.launchApp(packageName);
 	}
 
 	public async terminateApp(packageName: string): Promise<void> {
 		validatePackageName(packageName);
-		await this.assertTunnelRunning();
-		await this.ios("kill", packageName);
+		// Use WDA to terminate apps — go-ios `kill` uses the instruments service
+		// which conflicts with WDA
+		const wda = await this.wda();
+		await wda.terminateApp(packageName);
 	}
 
 	public async installApp(path: string): Promise<void> {
