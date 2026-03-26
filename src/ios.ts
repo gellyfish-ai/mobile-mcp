@@ -5,8 +5,26 @@ import { WebDriverAgent } from "./webdriver-agent";
 import { ActionableError, Button, InstalledApp, Robot, ScreenSize, SwipeDirection, ScreenElement, Orientation } from "./robot";
 import { validatePackageName } from "./utils";
 
-const WDA_PORT = 8100;
+const DEFAULT_WDA_PORT = parseInt(process.env.WDA_PORT || "8100", 10);
 const IOS_TUNNEL_PORT = 60105;
+
+/**
+ * Parse WDA_PORTS env var for per-device port mapping.
+ * Format: "udid1:port1,udid2:port2"
+ * Falls back to WDA_PORT or 8100.
+ */
+function getWdaPort(deviceId: string): number {
+	const mapping = process.env.WDA_PORTS;
+	if (mapping) {
+		for (const entry of mapping.split(",")) {
+			const [udid, port] = entry.trim().split(":");
+			if (udid === deviceId && port) {
+				return parseInt(port, 10);
+			}
+		}
+	}
+	return DEFAULT_WDA_PORT;
+}
 
 interface ListCommandOutput {
 	deviceList: string[];
@@ -42,7 +60,10 @@ const getGoIosPath = (): string => {
 
 export class IosRobot implements Robot {
 
+	private wdaPort: number;
+
 	public constructor(private deviceId: string) {
+		this.wdaPort = getWdaPort(deviceId);
 	}
 
 	private isListeningOnPort(port: number): Promise<boolean> {
@@ -64,7 +85,7 @@ export class IosRobot implements Robot {
 	}
 
 	private async isWdaForwardRunning(): Promise<boolean> {
-		return await this.isListeningOnPort(WDA_PORT);
+		return await this.isListeningOnPort(this.wdaPort);
 	}
 
 	private async assertTunnelRunning(): Promise<void> {
@@ -83,7 +104,7 @@ export class IosRobot implements Robot {
 			throw new ActionableError("Port forwarding to WebDriverAgent is not running (tunnel okay), please see https://github.com/mobile-next/mobile-mcp/wiki/");
 		}
 
-		const wda = new WebDriverAgent("localhost", WDA_PORT);
+		const wda = new WebDriverAgent("localhost", this.wdaPort);
 
 		if (!(await wda.isRunning())) {
 			throw new ActionableError("WebDriverAgent is not running on device (tunnel okay, port forwarding okay), please see https://github.com/mobile-next/mobile-mcp/wiki/");
@@ -241,6 +262,11 @@ export class IosRobot implements Robot {
 		// Use WDA /wda/unlock + home button press
 		const wda = await this.wda();
 		await wda.wakeDevice();
+	}
+
+	public async isLocked(): Promise<boolean> {
+		const wda = await this.wda();
+		return wda.isLocked();
 	}
 }
 

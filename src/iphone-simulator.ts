@@ -285,4 +285,9 @@ export class Simctl implements Robot {
 		const wda = await this.wda();
 		await wda.wakeDevice();
 	}
+
+	public async isLocked(): Promise<boolean> {
+		const wda = await this.wda();
+		return wda.isLocked();
+	}
 }

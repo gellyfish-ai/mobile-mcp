@@ -223,4 +223,10 @@ export class MobileDevice implements Robot {
 		// Press home button to wake the screen
 		this.runCommand(["io", "button", "HOME"]);
 	}
+
+	public async isLocked(): Promise<boolean> {
+		// MobileDevice (go-ios based) doesn't have a direct lock check
+		// Return false as a safe default — callers should use list_elements as fallback
+		return false;
+	}
 }

@@ -481,6 +481,13 @@ export class AndroidRobot implements Robot {
 		this.adb("shell", "input", "keyevent", "KEYCODE_WAKEUP");
 	}
 
+	public async isLocked(): Promise<boolean> {
+		const output = this.adb("shell", "dumpsys", "power").toString();
+		// mHoldingDisplaySuspendBlocker=false means screen is off
+		// mHoldingWakeLockSuspendBlocker relates to wake locks
+		return output.includes("mHoldingDisplaySuspendBlocker=false");
+	}
+
 	private async getUiAutomatorDump(): Promise<string> {
 		for (let tries = 0; tries < 10; tries++) {
 			const dump = this.adb("exec-out", "uiautomator", "dump", "/dev/tty").toString();

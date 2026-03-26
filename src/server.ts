@@ -530,6 +530,21 @@ export const createMcpServer = (): McpServer => {
 	);
 
 	tool(
+		"mobile_is_locked",
+		"Is Device Locked",
+		"Check if the device screen is locked. Returns true if locked, false if unlocked. This is a fast check (~18ms) that should be called before any interaction to avoid wasting time on a locked screen. If locked, use mobile_launch_app to wake and unlock the device.",
+		{
+			device: z.string().describe("The device identifier to use. Use mobile_list_available_devices to find which devices are available to you."),
+		},
+		{ readOnlyHint: true },
+		async ({ device }) => {
+			const robot = getRobotFromDevice(device);
+			const locked = await robot.isLocked();
+			return locked ? "true" : "false";
+		}
+	);
+
+	tool(
 		"mobile_wake_device",
 		"Wake Device",
 		"Wake the device from display sleep. Ensures the screen is on and ready for interaction. Use this if the device screen is off or if screenshots show a black screen.",

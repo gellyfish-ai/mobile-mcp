@@ -150,4 +150,10 @@ export interface Robot {
 	 * and ready for interaction.
 	 */
 	wakeDevice(): Promise<void>;
+
+	/**
+	 * Check if the device screen is locked.
+	 * Returns true if locked, false if unlocked.
+	 */
+	isLocked(): Promise<boolean>;
 }
